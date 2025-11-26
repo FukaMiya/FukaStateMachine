@@ -76,17 +76,7 @@ namespace FukaMiya.Utils
             Transition maxWeightTransition = null;
             foreach (var transition in transitions)
             {
-                bool allConditionsMet = true;
-                foreach (var condition in transition.Conditions)
-                {
-                    if (!condition())
-                    {
-                        allConditionsMet = false;
-                        break;
-                    }
-                }
-
-                if (allConditionsMet)
+                if (transition.Condition == null || transition.Condition.Evaluate())
                 {
                     if (maxWeightTransition == null || transition.Weight > maxWeightTransition.Weight)
                     {
@@ -111,88 +101,5 @@ namespace FukaMiya.Utils
         }
 
         public override string ToString() => GetType().Name;
-    }
-
-    public sealed class Transition : IEquatable<Transition>
-    {
-        public State From { get; }
-        public State To { get; }
-        public float Weight { get; }
-        public HashSet<Func<bool>> Conditions { get; } = new();
-
-        public Transition(State from, State to, float weight = 1f)
-        {
-            From = from;
-            To = to;
-            Weight = weight;
-        }
-
-        public Transition AddConditions(HashSet<Func<bool>> condition)
-        {
-            Conditions.UnionWith(condition);
-            return this;
-        }
-
-        public bool Equals(Transition other)
-        {
-            if (other is null) return false;
-            return From == other.From && To == other.To;
-        }
-    }
-
-    public sealed class TransitionBuilder
-    {
-        private  readonly StateMachine StateMachine;
-        private State fromState;
-        private State toState;
-        private readonly HashSet<Func<bool>> conditions = new();
-
-        public TransitionBuilder(StateMachine stateMachine)
-        {
-            StateMachine = stateMachine;
-        }
-
-        public TransitionBuilder From<T>() where T : State, new()
-        {
-            fromState = StateMachine.At<T>();
-            return this;
-        }
-
-        public TransitionBuilder From(State from)
-        {
-            fromState = from;
-            return this;
-        }
-
-        public TransitionBuilder To<T>() where T : State, new()
-        {
-            toState = StateMachine.At<T>();
-            return this;
-        }
-
-        public TransitionBuilder To(State to)
-        {
-            toState = to;
-            return this;
-        }
-
-        public TransitionBuilder When(Func<bool> condition)
-        {
-            conditions.Add(condition);
-            return this;
-        }
-
-        public Transition Build()
-        {
-            var transition = new Transition(fromState, toState);
-            transition.AddConditions(conditions);
-            fromState.AddTransition(transition);
-            return transition;
-        }
-
-        public static implicit operator Transition(TransitionBuilder builder)
-        {
-            return builder.Build();
-        }
     }
 }

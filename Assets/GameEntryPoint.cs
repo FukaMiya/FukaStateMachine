@@ -13,7 +13,9 @@ public class GameEntryPoint : MonoBehaviour
         var mainMenuState = stateMachine.At<MainMenuState>();
 
         titleState.To<InGameState>()
-            .When(() => Input.GetKeyDown(KeyCode.Space))
+            .When(Condition.Any(
+                () => Input.GetKeyDown(KeyCode.Return),
+                () => Input.GetKeyDown(KeyCode.Space)))
             .Build();
 
         inGameState.To<MainMenuState>()
