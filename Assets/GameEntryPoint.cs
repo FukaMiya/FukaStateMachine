@@ -58,6 +58,7 @@ public class GameEntryPoint : MonoBehaviour
 
         stateMachine.SetInitialState<TitleState>();
 
+        // マーメイド記法で状態遷移図を出力
         Debug.Log(stateMachine.ToMermaidString());
     }
 

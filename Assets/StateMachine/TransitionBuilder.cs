@@ -6,6 +6,7 @@ namespace FukaMiya.Utils
     {
         public ITransitionInitializer From<T>() where T : State, new();
         public ITransitionStarter To<T>() where T : State, new();
+        public ITransitionStarter To(State toState);
     }
 
     public sealed class TransitionInitializer : ITransitionInitializer
@@ -28,6 +29,11 @@ namespace FukaMiya.Utils
         public ITransitionStarter To<T>() where T : State, new()
         {
             var toState = stateMachine.At<T>();
+            return TransitionBuilder.To(fromState, toState);
+        }
+
+        public ITransitionStarter To(State toState)
+        {
             return TransitionBuilder.To(fromState, toState);
         }
     }
@@ -53,6 +59,7 @@ namespace FukaMiya.Utils
     public interface ITransitionParameterSetter
     {
         public ITransitionFinalizer SetAllowReentry(bool allowReentry);
+        public ITransitionFinalizer SetWeight(float weight);
     }
 
     public sealed class TransitionBuilder : ITransitionStarter, ITransitionChain, ITransitionFinalizer
@@ -110,6 +117,12 @@ namespace FukaMiya.Utils
             return this;
         }
 
+        public ITransitionFinalizer SetWeight(float weight)
+        {
+            transitionParams.Weight = weight;
+            return this;
+        }
+
         public Transition Always()
         {
             return Build();
@@ -144,21 +157,18 @@ namespace FukaMiya.Utils
     {
         private readonly State to;
         private readonly Func<State> stateProvider;
-        public float Weight { get; }
         public StateCondition Condition { get; private set; }
 
         public TransitionParams Params { get; private set;}
 
-        public Transition(State to, float weight = 1f)
+        public Transition(State to)
         {
             this.to = to;
-            Weight = weight;
         }
 
-        public Transition(Func<State> stateProvider, float weight = 1f)
+        public Transition(Func<State> stateProvider)
         {
             this.stateProvider = stateProvider;
-            Weight = weight;
         }
 
         public void SetCondition(StateCondition condition)
@@ -179,12 +189,13 @@ namespace FukaMiya.Utils
         public bool Equals(Transition other)
         {
             if (other == null) return false;
-            return to == other.to && Weight == other.Weight && Condition == other.Condition;
+            return to == other.to && Condition == other.Condition;
         }
     }
     
     public sealed class TransitionParams
     {
+        public float Weight { get; set; } = 1f;
         public bool IsReentryAllowed { get; set; } = false;
     }
 
