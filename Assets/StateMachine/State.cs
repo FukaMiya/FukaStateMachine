@@ -15,6 +15,25 @@ namespace FukaMiya.Utils
             return TransitionBuilder.To(from, to);
         }
 
+        public static ITransitionStarter To<T, C>(this State from, C context) where T : State<C>, new()
+        {
+            var toState = from.StateMachine.At<T, C>(context);
+            return TransitionBuilder.To(from, toState);
+        }
+
+        public static ITransitionStarter To<C>(this State from, State to, C context)
+        {
+            if (to is State<C> stateWithContext)
+            {
+                stateWithContext.UpdateContext(context);
+                return TransitionBuilder.To(from, to);
+            }
+            else
+            {
+                throw new InvalidOperationException($"The state {to.GetType().Name} is not of type State<{typeof(C).Name}>.");
+            }
+        }
+
         public static ITransitionStarter Back(this State from)
         {
             return TransitionBuilder.To(from, () => from.StateMachine.PreviousState);
@@ -32,9 +51,24 @@ namespace FukaMiya.Utils
         private readonly List<Transition> transitions = new();
         public IReadOnlyList<Transition> GetTransitions => transitions.AsReadOnly();
 
-        public virtual void OnEnter() { }
-        public virtual void OnExit() { }
-        public virtual void OnUpdate() { }
+        protected virtual void OnEnter() { }
+        protected virtual void OnExit() { }
+        protected virtual void OnUpdate() { }
+
+        public void Enter()
+        {
+            OnEnter();
+        }
+
+        public void Exit()
+        {
+            OnExit();
+        }
+
+        public void Update()
+        {
+            OnUpdate();
+        }
 
         public bool CheckTransitionTo(out State nextState)
         {
@@ -79,6 +113,23 @@ namespace FukaMiya.Utils
         public bool IsStateOf(Type type) => GetType() == type;
 
         public override string ToString() => GetType().Name;
+    }
+
+    public abstract class State<T> : State
+    {
+        public T Context { get; private set; }
+
+        public void Setup(StateMachine stateMachine, T context)
+        {
+            UpdateContext(context);
+            base.Setup(stateMachine);
+        }
+
+        public void UpdateContext(T context)
+        {
+            UnityEngine.Debug.Log($"Context updated: {context}");
+            Context = context;
+        }
     }
 
     public sealed class AnyState : State

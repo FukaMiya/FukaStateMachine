@@ -33,21 +33,21 @@ namespace FukaMiya.Utils
                 return;
             }
 
-            CurrentState.OnUpdate();
+            CurrentState.Update();
         }
 
         void ChangeState(State nextState)
         {
-            CurrentState.OnExit();
+            CurrentState.Exit();
             PreviousState = CurrentState;
             CurrentState = nextState;
-            CurrentState.OnEnter();
+            CurrentState.Enter();
         }
 
         public void SetInitialState<T>() where T : State, new()
         {
             CurrentState = At<T>();
-            CurrentState.OnEnter();
+            CurrentState.Enter();
         }
 
         public State At<T>() where T : State, new()
@@ -62,10 +62,33 @@ namespace FukaMiya.Utils
             return state;
         }
 
+        public State At<T, C>(C context) where T : State<C>, new()
+        {
+            if (states.TryGetValue(typeof(T), out var state))
+            {
+                if (state is State<C> typedState)
+                {
+                    typedState.UpdateContext(context);
+                }
+                return state;
+            }
+
+            state = CreateStateInstance<T, C>(context);
+            states[typeof(T)] = state;
+            return state;
+        }
+
         State CreateStateInstance<T>() where T : State, new()
         {
             T instance = new ();
             instance.Setup(this);
+            return instance;
+        }
+
+        State CreateStateInstance<T, C>(C context) where T : State<C>, new()
+        {
+            T instance = new ();
+            instance.Setup(this, context);
             return instance;
         }
 

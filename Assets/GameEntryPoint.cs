@@ -4,6 +4,7 @@ using FukaMiya.Utils;
 public class GameEntryPoint : MonoBehaviour
 {
     private StateMachine stateMachine;
+    public ContextData context = new() { Score = 0 };
 
     void Start()
     {
@@ -44,8 +45,14 @@ public class GameEntryPoint : MonoBehaviour
                 () => Input.GetKeyDown(KeyCode.Alpha3)))
             .Build();
 
-        inGameState.To<ResultState>()
+        // コンテキスト付きの状態遷移
+        inGameState.To<ResultState, ContextData>(context)
             .When(() => Input.GetKeyDown(KeyCode.Space))
+            .Build();
+
+        // コンテキスト無しの状態遷移も可能
+        inGameState.To<ResultState>()
+            .When(() => Input.GetKeyDown(KeyCode.Return))
             .Build();
 
         resultState.To<TitleState>()
@@ -66,4 +73,10 @@ public class GameEntryPoint : MonoBehaviour
     {
         stateMachine.Update();
     }
+}
+
+[System.Serializable]
+public class ContextData
+{
+    public int Score;
 }

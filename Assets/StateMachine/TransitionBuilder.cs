@@ -6,7 +6,10 @@ namespace FukaMiya.Utils
     {
         public ITransitionInitializer From<T>() where T : State, new();
         public ITransitionStarter To<T>() where T : State, new();
+        public ITransitionStarter To<T, C>(C context) where T : State<C>, new();
         public ITransitionStarter To(State toState);
+        public ITransitionStarter To<C>(State toState, C context);
+
     }
 
     public sealed class TransitionInitializer : ITransitionInitializer
@@ -35,6 +38,25 @@ namespace FukaMiya.Utils
         public ITransitionStarter To(State toState)
         {
             return TransitionBuilder.To(fromState, toState);
+        }
+
+        public ITransitionStarter To<T, C>(C context) where T : State<C>, new()
+        {
+            var toState = stateMachine.At<T, C>(context);
+            return TransitionBuilder.To(fromState, toState);
+        }
+
+        public ITransitionStarter To<C>(State toState, C context)
+        {
+            if (toState is State<C> stateWithContext)
+            {
+                stateWithContext.UpdateContext(context);
+                return TransitionBuilder.To(fromState, toState);
+            }
+            else
+            {
+                throw new InvalidOperationException($"The state {toState.GetType().Name} is not of type State<{typeof(C).Name}>.");
+            }
         }
     }
 
