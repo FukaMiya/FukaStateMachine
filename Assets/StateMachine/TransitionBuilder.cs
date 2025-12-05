@@ -181,6 +181,7 @@ namespace FukaMiya.Utils
         public StateCondition Condition { get; }
         public TransitionParams Params { get; }
         public State GetToState();
+        public void OnTransition(State state);
     }
 
     public sealed class Transition<TContext> : ITransition
@@ -204,25 +205,23 @@ namespace FukaMiya.Utils
             this.contextProvider = contextProvider;
         }
 
-        public void SetCondition(StateCondition condition)
+        public void OnTransition(State nextState)
         {
-            Condition = condition;
+            if (nextState is State<TContext> stateWithContext)
+            {
+                stateWithContext.SetContextProvider(contextProvider);
+            }
+
+            else if (typeof(TContext) == typeof(NoContext) && nextState is IStateWithContext clearableState)
+            {
+                clearableState.ClearContextProvider();
+            }
         }
 
-        public void SetParams(TransitionParams transitionParams)
-        {
-            Params = transitionParams;
-        }
-
-        public State GetToState()
-        {
-            return stateProvider != null ? stateProvider() : to;
-        }
-
-        public TContext GetContext()
-        {
-            return contextProvider != null ? contextProvider() : default;
-        }
+        public void SetCondition(StateCondition condition) => Condition = condition;
+        public void SetParams(TransitionParams transitionParams) => Params = transitionParams;
+        public State GetToState() => stateProvider != null ? stateProvider() : to;
+        public TContext GetContext() => contextProvider != null ? contextProvider() : default;
     }
     
     public sealed class TransitionParams
