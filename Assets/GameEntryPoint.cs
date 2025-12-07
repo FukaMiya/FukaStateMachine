@@ -8,7 +8,20 @@ public class GameEntryPoint : MonoBehaviour
 
     void Start()
     {
-        stateMachine = new StateMachine();
+        stateMachine = new StateMachine(
+            new StateFactory((type) =>
+            {
+                return type switch
+                {
+                    _ when type == typeof(TitleState) => new TitleState(),
+                    _ when type == typeof(InGameState) => new InGameState(),
+                    _ when type == typeof(ResultState) => new ResultState(),
+                    _ when type == typeof(SettingState) => new SettingState(),
+                    _ when type == typeof(SecretState) => new SecretState(),
+                    _ => throw new System.InvalidOperationException($"Unknown state type: {type}")
+                };
+            })
+        );
         var titleState = stateMachine.At<TitleState>();
         var inGameState = stateMachine.At<InGameState>();
         var resultState = stateMachine.At<ResultState>();

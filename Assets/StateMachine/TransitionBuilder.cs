@@ -2,15 +2,6 @@ using System;
 
 namespace FukaMiya.Utils
 {
-    public interface ITransitionInitializer
-    {
-        ITransitionInitializer From<T>() where T : State, new();
-        ITransitionStarter<NoContext> To<T>() where T : State, new();
-        ITransitionStarter<TContext> To<T, TContext>(Func<TContext> context) where T : State<TContext>, new();
-        ITransitionStarter<NoContext> To(State toState);
-        ITransitionStarter<TContext> To<TContext>(State toState, Func<TContext> context);
-    }
-
     public interface ITransitionStarter<TContext> : ITransitionParameterSetter<TContext>
     {
         ITransitionChain<TContext> When(StateCondition condition);
@@ -126,50 +117,39 @@ namespace FukaMiya.Utils
         }
     }
 
-    internal sealed class TransitionInitializer : ITransitionInitializer
+    public static class TransitionExtensions
     {
-        private readonly StateMachine stateMachine;
-        private readonly State fromState;
-
-        public TransitionInitializer(StateMachine stateMachine, State fromState)
+        public static ITransitionStarter<NoContext> To<T>(this State from) where T : State, new()
         {
-            this.stateMachine = stateMachine;
-            this.fromState = fromState;
+            return TransitionBuilder<NoContext>.To(from, from.StateMachine.At<T>(), null);
         }
 
-        public ITransitionInitializer From<T>() where T : State, new()
+        public static ITransitionStarter<NoContext> To(this State from, State to)
         {
-            var newFromState = stateMachine.At<T>();
-            return new TransitionInitializer(stateMachine, newFromState);
+            return TransitionBuilder<NoContext>.To(from, to, null);
         }
 
-        public ITransitionStarter<NoContext> To<T>() where T : State, new()
+        public static ITransitionStarter<TContext> To<T, TContext>(this State from, Func<TContext> context) where T : State<TContext>, new()
         {
-            var toState = stateMachine.At<T>();
-            return TransitionBuilder<NoContext>.To(fromState, toState, null);
+            var toState = from.StateMachine.At<T>();
+            return TransitionBuilder<TContext>.To(from, toState, context);
         }
 
-        public ITransitionStarter<NoContext> To(State toState)
+        public static ITransitionStarter<TContext> To<TContext>(this State from, State to, Func<TContext> context)
         {
-            return TransitionBuilder<NoContext>.To(fromState, toState, null);
-        }
-
-        public ITransitionStarter<TContext> To<T, TContext>(Func<TContext> context) where T : State<TContext>, new()
-        {
-            var toState = stateMachine.At<T>();
-            return TransitionBuilder<TContext>.To(fromState, toState, context);
-        }
-
-        public ITransitionStarter<TContext> To<TContext>(State toState, Func<TContext> context)
-        {
-            if (toState is State<TContext>)
+            if (to is State<TContext>)
             {
-                return TransitionBuilder<TContext>.To(fromState, toState, context);
+                return TransitionBuilder<TContext>.To(from, to, context);
             }
             else
             {
-                throw new InvalidOperationException($"The state {toState.GetType().Name} is not of type State<{typeof(TContext).Name}>.");
+                throw new InvalidOperationException($"The state {to.GetType().Name} is not of type State<{typeof(TContext).Name}>.");
             }
+        }
+
+        public static ITransitionStarter<NoContext> Back(this State from)
+        {
+            return TransitionBuilder<NoContext>.To(from, () => from.StateMachine.PreviousState, null);
         }
     }
 

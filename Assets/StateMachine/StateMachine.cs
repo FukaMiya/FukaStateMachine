@@ -9,14 +9,14 @@ namespace FukaMiya.Utils
         public State CurrentState { get; private set; }
         public State PreviousState { get; private set; }
 
-        private readonly Dictionary<Type, State> states = new();
+        private readonly StateFactory stateFactory;
         public AnyState AnyState { get; }
 
-        public StateMachine()
+        public StateMachine(StateFactory factory)
         {
+            stateFactory = factory;
             AnyState = new AnyState();
-            AnyState.Setup(this);
-            states[typeof(AnyState)] = AnyState;
+            AnyState.SetStateMachine(this);
         }
 
         public void Update()
@@ -36,14 +36,6 @@ namespace FukaMiya.Utils
             CurrentState.Update();
         }
 
-        void ChangeState(State nextState)
-        {
-            CurrentState.Exit();
-            PreviousState = CurrentState;
-            CurrentState = nextState;
-            CurrentState.Enter();
-        }
-
         public void SetInitialState<T>() where T : State, new()
         {
             CurrentState = At<T>();
@@ -52,28 +44,21 @@ namespace FukaMiya.Utils
 
         public State At<T>() where T : State, new()
         {
-            if (states.TryGetValue(typeof(T), out var state))
+            if (typeof(T) == typeof(AnyState))
             {
-                return state;
+                return AnyState;
             }
 
-            state = CreateStateInstance<T>();
-            states[typeof(T)] = state;
+            var state = stateFactory.CreateState<T>();
+            state.SetStateMachine(this);
             return state;
-        }
-
-        State CreateStateInstance<T>() where T : State, new()
-        {
-            T instance = new ();
-            instance.Setup(this);
-            return instance;
         }
 
         public string ToMermaidString()
         {
             var sb = new StringBuilder();
             sb.AppendLine("stateDiagram-v2");
-            foreach (var state in states.Values)
+            foreach (var state in stateFactory.CachedStates)
             {
                 foreach (var t in state.GetTransitions)
                 {
@@ -83,41 +68,40 @@ namespace FukaMiya.Utils
             }
             return sb.ToString();
         }
+
+        void ChangeState(State nextState)
+        {
+            CurrentState.Exit();
+            PreviousState = CurrentState;
+            CurrentState = nextState;
+            CurrentState.Enter();
+        }
     }
 
-    public static class StateExtensions
+    public sealed class StateFactory
     {
-        public static ITransitionStarter<NoContext> To<T>(this State from) where T : State, new()
+        private readonly Func<Type, State> factoryMethod;
+        private readonly Dictionary<Type, State> stateCache = new();
+        public IReadOnlyList<State> CachedStates => new List<State>(stateCache.Values);
+
+        public StateFactory(Func<Type, State> factoryMethod)
         {
-            return TransitionBuilder<NoContext>.To(from, from.StateMachine.At<T>(), null);
+            this.factoryMethod = factoryMethod;
         }
 
-        public static ITransitionStarter<NoContext> To(this State from, State to)
+        public State CreateState<T>() where T : State, new() => CreateState(typeof(T));
+        public State CreateState(Type stateType)
         {
-            return TransitionBuilder<NoContext>.To(from, to, null);
-        }
-
-        public static ITransitionStarter<TContext> To<T, TContext>(this State from, Func<TContext> context) where T : State<TContext>, new()
-        {
-            var toState = from.StateMachine.At<T>();
-            return TransitionBuilder<TContext>.To(from, toState, context);
-        }
-
-        public static ITransitionStarter<TContext> To<TContext>(this State from, State to, Func<TContext> context)
-        {
-            if (to is State<TContext>)
+            if (stateCache.TryGetValue(stateType, out var cachedState))
             {
-                return TransitionBuilder<TContext>.To(from, to, context);
+                return cachedState;
             }
-            else
-            {
-                throw new InvalidOperationException($"The state {to.GetType().Name} is not of type State<{typeof(TContext).Name}>.");
-            }
+
+            var newState = factoryMethod(stateType);
+            stateCache[stateType] = newState;
+            return newState;
         }
 
-        public static ITransitionStarter<NoContext> Back(this State from)
-        {
-            return TransitionBuilder<NoContext>.To(from, () => from.StateMachine.PreviousState, null);
-        }
+        public void ClearCache() => stateCache.Clear();
     }
 }

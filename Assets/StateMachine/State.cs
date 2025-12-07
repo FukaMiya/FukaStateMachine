@@ -6,12 +6,9 @@ namespace FukaMiya.Utils
     public abstract class State
     {
         public StateMachine StateMachine { get; private set; }
-        public void Setup(StateMachine stateMachine)
-        {
-            StateMachine = stateMachine;
-        }
+        public void SetStateMachine(StateMachine stateMachine) => StateMachine = stateMachine;
 
-        protected readonly List<ITransition> transitions = new();
+        private readonly List<ITransition> transitions = new();
         public IReadOnlyList<ITransition> GetTransitions => transitions.AsReadOnly();
 
         protected virtual void OnEnter() { }
@@ -44,13 +41,13 @@ namespace FukaMiya.Utils
                 {
                     var toState = transition.GetToState();
                     if (toState == null) continue;
-                    if (!transition.Params.IsReentryAllowed && StateMachine.CurrentState.IsStateOf(toState.GetType())) continue;
+                    if (!transition.IsReentryAllowed && StateMachine.CurrentState.IsStateOf(toState.GetType())) continue;
 
-                    if (maxWeightToState == null || transition.Params.Weight > maxWeight)
+                    if (maxWeightToState == null || transition.Weight > maxWeight)
                     {
                         maxWeightToState = toState;
                         maxWeightTransition = transition;
-                        maxWeight = transition.Params.Weight;
+                        maxWeight = transition.Weight;
                     }
                 }
             }

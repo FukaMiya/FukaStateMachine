@@ -3,7 +3,7 @@ using System;
 namespace FukaMiya.Utils
 {
     public delegate bool StateCondition();
-    public sealed class TransitionParams
+    internal sealed class TransitionParams
     {
         public float Weight { get; set; } = 1f;
         public bool IsReentryAllowed { get; set; } = false;
@@ -12,7 +12,10 @@ namespace FukaMiya.Utils
     public interface ITransition
     {
         public StateCondition Condition { get; }
-        TransitionParams Params { get; }
+
+        float Weight { get; }
+        bool IsReentryAllowed { get; }
+        
         public State GetToState();
         public void OnTransition(State state);
     }
@@ -25,6 +28,9 @@ namespace FukaMiya.Utils
         public StateCondition Condition { get; private set; }
 
         public TransitionParams Params { get; private set;}
+
+        public float Weight => Params.Weight;
+        public bool IsReentryAllowed => Params.IsReentryAllowed;
 
         public Transition(State to, Func<TContext> contextProvider)
         {
