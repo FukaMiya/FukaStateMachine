@@ -9,11 +9,7 @@ public class GameEntryPoint : MonoBehaviour
     void Start()
     {
         var factory = new StateFactory();
-        factory.Register<TitleState>(() => new TitleState());
         factory.Register<InGameState>(() => new InGameState(InitialScore));
-        factory.Register<ResultState>(() => new ResultState());
-        factory.Register<SettingState>(() => new SettingState());
-        factory.Register<SecretState>(() => new SecretState());
         stateMachine = new StateMachine(factory);
 
         var titleState = stateMachine.At<TitleState>();

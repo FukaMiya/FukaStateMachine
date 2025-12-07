@@ -63,7 +63,8 @@ namespace FukaMiya.Utils
                 foreach (var t in state.GetTransitions)
                 {
                     var toState = t.GetToState();
-                    sb.AppendLine($"    {state} --> {(toState == null ? "AnyState" : toState.ToString())}");
+                    var transitionName = string.IsNullOrEmpty(t.Name) ? (toState == null ? "AnyState" : toState.ToString()) : t.Name;
+                    sb.AppendLine($"    {state} --> {transitionName}");
                 }
             }
             return sb.ToString();
@@ -116,9 +117,13 @@ namespace FukaMiya.Utils
                     {
                         autoCreatedState = Activator.CreateInstance(stateType) as State;
                     }
-                    catch
+                    catch (MissingMethodException)
                     {
-                        throw new InvalidOperationException($"Failed to auto-create state of type {stateType.Name}. Ensure it has a parameterless constructor.");
+                        throw new InvalidOperationException($"Failed to auto-create {stateType.Name}. It requires a parameterless constructor.");
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"An error occurred while creating {stateType.Name}: {ex.Message}", ex);
                     }
 
                     stateCache[stateType] = autoCreatedState;
@@ -130,7 +135,7 @@ namespace FukaMiya.Utils
                 }
             }
 
-            var newState = factories[stateType]();
+            var newState = factories[stateType]() ?? throw new InvalidOperationException($"Factory for state type {stateType.Name} returned null.");
             stateCache[stateType] = newState;
             return newState;
         }

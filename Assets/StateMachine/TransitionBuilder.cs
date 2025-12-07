@@ -24,6 +24,7 @@ namespace FukaMiya.Utils
     {
         ITransitionFinalizer<TContext> SetAllowReentry(bool allowReentry);
         ITransitionFinalizer<TContext> SetWeight(float weight);
+        ITransitionFinalizer<TContext> SetName(string name);
     }
 
     internal sealed class TransitionBuilder<TContext> : ITransitionStarter<TContext>, ITransitionChain<TContext>, ITransitionFinalizer<TContext>
@@ -89,6 +90,12 @@ namespace FukaMiya.Utils
             return this;
         }
 
+        public ITransitionFinalizer<TContext> SetName(string name)
+        {
+            transitionParams.Name = name;
+            return this;
+        }
+
         public ITransition Always()
         {
             return Build();
@@ -149,7 +156,10 @@ namespace FukaMiya.Utils
 
         public static ITransitionStarter<NoContext> Back(this State from)
         {
-            return TransitionBuilder<NoContext>.To(from, () => from.StateMachine.PreviousState, null);
+            var builder = TransitionBuilder<NoContext>
+                .To(from, () => from.StateMachine.PreviousState, null);
+            builder.SetName("PreviousState");
+            return builder;
         }
     }
 

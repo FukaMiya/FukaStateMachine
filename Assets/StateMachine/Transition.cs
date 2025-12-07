@@ -5,6 +5,7 @@ namespace FukaMiya.Utils
     public delegate bool StateCondition();
     internal sealed class TransitionParams
     {
+        public string Name { get; set; } = string.Empty;
         public float Weight { get; set; } = 1f;
         public bool IsReentryAllowed { get; set; } = false;
     }
@@ -13,6 +14,7 @@ namespace FukaMiya.Utils
     {
         public StateCondition Condition { get; }
 
+        public string Name { get; }
         float Weight { get; }
         bool IsReentryAllowed { get; }
         
@@ -26,11 +28,11 @@ namespace FukaMiya.Utils
         private readonly Func<TContext> contextProvider;
         private readonly Func<State> stateProvider;
         public StateCondition Condition { get; private set; }
-
-        public TransitionParams Params { get; private set;}
+        public TransitionParams Params { get; private set; }
 
         public float Weight => Params.Weight;
         public bool IsReentryAllowed => Params.IsReentryAllowed;
+        public string Name => Params.Name;
 
         public Transition(State to, Func<TContext> contextProvider)
         {
