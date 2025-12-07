@@ -11,9 +11,32 @@ public sealed class TitleState : State
 
 public sealed class InGameState : State
 {
+    private readonly int initialScore;
+    public int Score { get; private set; }
+
+    public InGameState(int initialScore)
+    {
+        this.initialScore = initialScore;
+    }
+
     protected override void OnEnter()
     {
+        Score = initialScore;
         Debug.Log("Entered InGame State");
+    }
+
+    protected override void OnUpdate()
+    {
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            Score += 10;
+            Debug.Log($"Score increased to {Score}");
+        }
+        else if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            Score -= 10;
+            Debug.Log($"Score decreased to {Score}");
+        }
     }
 }
 

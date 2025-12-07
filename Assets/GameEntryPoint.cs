@@ -4,26 +4,20 @@ using FukaMiya.Utils;
 public class GameEntryPoint : MonoBehaviour
 {
     private StateMachine stateMachine;
-    public int Score = 0;
+    public int InitialScore = 100;
 
     void Start()
     {
-        stateMachine = new StateMachine(
-            new StateFactory((type) =>
-            {
-                return type switch
-                {
-                    _ when type == typeof(TitleState) => new TitleState(),
-                    _ when type == typeof(InGameState) => new InGameState(),
-                    _ when type == typeof(ResultState) => new ResultState(),
-                    _ when type == typeof(SettingState) => new SettingState(),
-                    _ when type == typeof(SecretState) => new SecretState(),
-                    _ => throw new System.InvalidOperationException($"Unknown state type: {type}")
-                };
-            })
-        );
+        var factory = new StateFactory();
+        factory.Register<TitleState>(() => new TitleState());
+        factory.Register<InGameState>(() => new InGameState(InitialScore));
+        factory.Register<ResultState>(() => new ResultState());
+        factory.Register<SettingState>(() => new SettingState());
+        factory.Register<SecretState>(() => new SecretState());
+        stateMachine = new StateMachine(factory);
+
         var titleState = stateMachine.At<TitleState>();
-        var inGameState = stateMachine.At<InGameState>();
+        var inGameState = stateMachine.At<InGameState>() as InGameState;
         var resultState = stateMachine.At<ResultState>();
         var settingState = stateMachine.At<SettingState>();
 
@@ -58,12 +52,12 @@ public class GameEntryPoint : MonoBehaviour
                 () => Input.GetKeyDown(KeyCode.Alpha3)))
             .Build();
 
-        // コンテキスト付きの状態遷移
-        inGameState.To<ResultState, int>(() => Score)
+        // 動的コンテキスト付きの状態遷移
+        inGameState.To<ResultState, int>(() => inGameState.Score)
             .When(() => Input.GetKeyDown(KeyCode.Return))
             .Build();
 
-        // コンテキスト無しの状態遷移も可能
+        // 動的コンテキスト無しの状態遷移も可能
         inGameState.To<ResultState>()
             .When(() => Input.GetKeyDown(KeyCode.Space))
             .Build();

@@ -119,7 +119,7 @@ namespace FukaMiya.Utils
 
     public static class TransitionExtensions
     {
-        public static ITransitionStarter<NoContext> To<T>(this State from) where T : State, new()
+        public static ITransitionStarter<NoContext> To<T>(this State from) where T : State
         {
             return TransitionBuilder<NoContext>.To(from, from.StateMachine.At<T>(), null);
         }
@@ -129,7 +129,7 @@ namespace FukaMiya.Utils
             return TransitionBuilder<NoContext>.To(from, to, null);
         }
 
-        public static ITransitionStarter<TContext> To<T, TContext>(this State from, Func<TContext> context) where T : State<TContext>, new()
+        public static ITransitionStarter<TContext> To<T, TContext>(this State from, Func<TContext> context) where T : State<TContext>
         {
             var toState = from.StateMachine.At<T>();
             return TransitionBuilder<TContext>.To(from, toState, context);

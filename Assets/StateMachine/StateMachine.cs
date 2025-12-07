@@ -36,13 +36,13 @@ namespace FukaMiya.Utils
             CurrentState.Update();
         }
 
-        public void SetInitialState<T>() where T : State, new()
+        public void SetInitialState<T>() where T : State
         {
             CurrentState = At<T>();
             CurrentState.Enter();
         }
 
-        public State At<T>() where T : State, new()
+        public State At<T>() where T : State
         {
             if (typeof(T) == typeof(AnyState))
             {
@@ -80,24 +80,57 @@ namespace FukaMiya.Utils
 
     public sealed class StateFactory
     {
-        private readonly Func<Type, State> factoryMethod;
+        private readonly Dictionary<Type, Func<State>> factories;
         private readonly Dictionary<Type, State> stateCache = new();
         public IReadOnlyList<State> CachedStates => new List<State>(stateCache.Values);
+        public bool IsAutoCreateEnabled { get; set; } = true;
 
-        public StateFactory(Func<Type, State> factoryMethod)
+        public StateFactory()
         {
-            this.factoryMethod = factoryMethod;
+            factories = new Dictionary<Type, Func<State>>();
+        }
+        public StateFactory(Dictionary<Type, Func<State>> factories)
+        {
+            this.factories = factories;
         }
 
-        public State CreateState<T>() where T : State, new() => CreateState(typeof(T));
-        public State CreateState(Type stateType)
+        public void Register<T>(Func<State> factory) where T : State
         {
+            factories[typeof(T)] = factory;
+        }
+
+        public State CreateState<T>() where T : State
+        {
+            var stateType = typeof(T);
             if (stateCache.TryGetValue(stateType, out var cachedState))
             {
                 return cachedState;
             }
 
-            var newState = factoryMethod(stateType);
+            if (!factories.ContainsKey(stateType))
+            {
+                if (IsAutoCreateEnabled)
+                {
+                    State autoCreatedState;
+                    try
+                    {
+                        autoCreatedState = Activator.CreateInstance(stateType) as State;
+                    }
+                    catch
+                    {
+                        throw new InvalidOperationException($"Failed to auto-create state of type {stateType.Name}. Ensure it has a parameterless constructor.");
+                    }
+
+                    stateCache[stateType] = autoCreatedState;
+                    return autoCreatedState;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"State of type {stateType.Name} is not registered in the StateFactory.");   
+                }
+            }
+
+            var newState = factories[stateType]();
             stateCache[stateType] = newState;
             return newState;
         }
