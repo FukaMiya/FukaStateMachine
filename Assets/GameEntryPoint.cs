@@ -7,7 +7,7 @@ public class GameEntryPoint : MonoBehaviour
     {
         SecretEntrance
     }
-    private IPushAndPullStateMachine<EventId> stateMachine;
+    private IPushAndPullStateMachine stateMachine;
 
     public int InitialScore = 100;
 
@@ -30,8 +30,13 @@ public class GameEntryPoint : MonoBehaviour
             .Build();
 
         titleState.To<SecretState>()
-            .On("SecretEntrance")
+            .On(EventId.SecretEntrance)
+            .When(() => Input.GetKey(KeyCode.LeftShift))
             .Build();
+
+        stateMachine.At<SecretState>().To<TitleState>()
+            .On(EventId.SecretEntrance)
+            .Always();
 
         // AnyStateからの遷移
         stateMachine.AnyState
@@ -83,7 +88,7 @@ public class GameEntryPoint : MonoBehaviour
 
     void Update()
     {
-        // stateMachine.Update();
+        stateMachine.Update();
 
         if (Input.GetKeyDown(KeyCode.F))
         {

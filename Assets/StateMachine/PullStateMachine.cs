@@ -24,8 +24,8 @@ namespace FukaMiya.Utils
                 throw new InvalidOperationException("CurrentState is not set. Please set the initial state using SetInitialState<T>() method.");
             }
 
-            if (AnyState.CheckTransitionTo(out var nextState) ||
-                CurrentState.CheckTransitionTo(out nextState))
+            if (AnyState.CheckTransitionTo(-1, out var nextState) ||
+                CurrentState.CheckTransitionTo(-1, out nextState))
             {
                 ChangeState(nextState);
                 return;

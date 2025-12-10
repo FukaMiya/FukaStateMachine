@@ -5,8 +5,13 @@ namespace FukaMiya.Utils
     public interface ITransitionStarter<TContext> : ITransitionParameterSetter<TContext>
     {
         ITransitionChain<TContext> When(StateCondition condition);
-        ITransitionChain<TContext> On(int eventId);
-        ITransitionChain<TContext> On(string eventId);
+        ITransitionConditionSetter<TContext> On<TEvent>(TEvent eventId) where TEvent : Enum;
+        ITransition Always();
+    }
+
+    public interface ITransitionConditionSetter<TContext>
+    {
+        ITransitionChain<TContext> When(StateCondition condition);
         ITransition Always();
     }
 
@@ -29,7 +34,8 @@ namespace FukaMiya.Utils
         ITransitionFinalizer<TContext> SetName(string name);
     }
 
-    internal sealed class TransitionBuilder<TContext> : ITransitionStarter<TContext>, ITransitionChain<TContext>, ITransitionFinalizer<TContext>, IDisposable
+    internal sealed class TransitionBuilder<TContext>
+        : ITransitionConditionSetter<TContext>, ITransitionStarter<TContext>, ITransitionChain<TContext>, ITransitionFinalizer<TContext>, IDisposable
     {
         private State fromState;
         private State fixedToState;
@@ -67,14 +73,7 @@ namespace FukaMiya.Utils
             return this;
         }
 
-        public ITransitionChain<TContext> On(int eventId)
-        {
-            this.condition = null;
-            this.eventId = eventId;
-            return this;
-        }
-
-        public ITransitionChain<TContext> On(string eventId)
+        public ITransitionConditionSetter<TContext> On<TEvent>(TEvent eventId) where TEvent : Enum
         {
             this.condition = null;
             this.eventId = eventId.GetHashCode();

@@ -30,38 +30,38 @@ namespace FukaMiya.Utils
             OnUpdate();
         }
 
-        public bool CheckTransitionTo(out State nextState)
-        {
-            State maxWeightToState = null;
-            ITransition maxWeightTransition = null;
-            float maxWeight = float.MinValue;
-            foreach (var transition in transitions)
-            {
-                if (transition.Condition == null || transition.Condition())
-                {
-                    var toState = transition.GetToState();
-                    if (toState == null) continue;
-                    if (!transition.IsReentryAllowed && StateMachine.CurrentState.IsStateOf(toState.GetType())) continue;
+        // public bool CheckTransitionTo(out State nextState)
+        // {
+        //     State maxWeightToState = null;
+        //     ITransition maxWeightTransition = null;
+        //     float maxWeight = float.MinValue;
+        //     foreach (var transition in transitions)
+        //     {
+        //         if (transition.Condition == null || transition.Condition())
+        //         {
+        //             var toState = transition.GetToState();
+        //             if (toState == null) continue;
+        //             if (!transition.IsReentryAllowed && StateMachine.CurrentState.IsStateOf(toState.GetType())) continue;
 
-                    if (maxWeightToState == null || transition.Weight > maxWeight)
-                    {
-                        maxWeightToState = toState;
-                        maxWeightTransition = transition;
-                        maxWeight = transition.Weight;
-                    }
-                }
-            }
+        //             if (maxWeightToState == null || transition.Weight > maxWeight)
+        //             {
+        //                 maxWeightToState = toState;
+        //                 maxWeightTransition = transition;
+        //                 maxWeight = transition.Weight;
+        //             }
+        //         }
+        //     }
 
-            if (maxWeightToState != null)
-            {
-                nextState = maxWeightToState;
-                maxWeightTransition.OnTransition(nextState);
-                return true;
-            }
+        //     if (maxWeightToState != null)
+        //     {
+        //         nextState = maxWeightToState;
+        //         maxWeightTransition.OnTransition(nextState);
+        //         return true;
+        //     }
 
-            nextState = null;
-            return false;
-        }
+        //     nextState = null;
+        //     return false;
+        // }
 
         public bool CheckTransitionTo(int eventId, out State nextState)
         {
