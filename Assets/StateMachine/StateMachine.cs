@@ -18,13 +18,13 @@ namespace FukaMiya.Utils
         void Update();
     }
 
-    public interface IPushStateMachine<TEvent> : IStateMachine
+    public interface IPushStateMachine<TEvent> : IStateMachine where TEvent : Enum
     {
         void Fire(int e);
-        void Fire(string e);
+        void Fire(TEvent e);
     }
 
-    public interface IPushAndPullStateMachine<TEvent> : IPullStateMachine, IPushStateMachine<TEvent>
+    public interface IPushAndPullStateMachine<TEvent> : IPullStateMachine, IPushStateMachine<TEvent> where TEvent : Enum
     {
     }
 
@@ -35,7 +35,7 @@ namespace FukaMiya.Utils
             return new PullStateMachine(factory);
         }
 
-        public static IPushAndPullStateMachine<TEvent> Create<TEvent>(StateFactory factory)
+        public static IPushAndPullStateMachine<TEvent> Create<TEvent>(StateFactory factory) where TEvent : Enum
         {
             return new PushAndPullStateMachine<TEvent>(factory);
         }

@@ -3,13 +3,10 @@ using System.Text;
 
 namespace FukaMiya.Utils
 {
-    internal sealed class PushAndPullStateMachine<TEvent> : PullStateMachine, IPushAndPullStateMachine<TEvent>
+    internal sealed class PushAndPullStateMachine<TEvent> : PullStateMachine, IPushAndPullStateMachine<TEvent> where TEvent : Enum
     {
-        private readonly StateFactory stateFactory;
-
         public PushAndPullStateMachine(StateFactory factory) : base(factory)
         {
-            stateFactory = factory;
             AnyState = new AnyState();
             AnyState.SetStateMachine(this);
         }
@@ -24,7 +21,7 @@ namespace FukaMiya.Utils
             }
         }
 
-        public void Fire(string eventId)
+        public void Fire(TEvent eventId)
         {
             Fire(eventId.GetHashCode());
         }
