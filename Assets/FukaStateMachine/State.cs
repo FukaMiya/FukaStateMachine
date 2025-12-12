@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace FukaMiya.Utils
+namespace FukaStateMachine
 {
     public abstract class State
     {

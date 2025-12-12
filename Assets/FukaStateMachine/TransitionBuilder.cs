@@ -1,6 +1,6 @@
 using System;
 
-namespace FukaMiya.Utils
+namespace FukaStateMachine
 {
     public interface ITransitionStarter<TContext> : ITransitionParameterSetter<TContext>
     {

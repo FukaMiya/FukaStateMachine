@@ -1,6 +1,6 @@
 using System;
 
-namespace FukaMiya.Utils
+namespace FukaStateMachine
 {
     public delegate bool StateCondition();
     internal sealed class TransitionParams

@@ -1,6 +1,6 @@
 using System;
 
-namespace FukaMiya.Utils
+namespace FukaStateMachine
 {
     internal sealed class PushAndPullStateMachine : PullStateMachine, IPushAndPullStateMachine, IEnumTypeHolder
     {

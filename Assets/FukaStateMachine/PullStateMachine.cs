@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace FukaMiya.Utils
+namespace FukaStateMachine
 {
     internal class PullStateMachine : IPullStateMachine
     {

@@ -1,5 +1,5 @@
 using UnityEngine;
-using FukaMiya.Utils;
+using FukaStateMachine;
 
 // 1. イベントIDの定義
 public enum GameEvent
