@@ -6,13 +6,13 @@ namespace FukaMiya.Utils
     {
         ITransitionChain<TContext> When(StateCondition condition);
         ITransitionConditionSetter<TContext> On<TEvent>(TEvent eventId) where TEvent : Enum;
-        ITransition Always();
+        ITransition Build();
     }
 
-    public interface ITransitionConditionSetter<TContext>
+    public interface ITransitionConditionSetter<TContext> : ITransitionParameterSetter<TContext>
     {
         ITransitionChain<TContext> When(StateCondition condition);
-        ITransition Always();
+        ITransition Build();
     }
 
     public interface ITransitionChain<TContext> : ITransitionParameterSetter<TContext>
@@ -118,11 +118,6 @@ namespace FukaMiya.Utils
         {
             transitionParams.Name = name;
             return this;
-        }
-
-        public ITransition Always()
-        {
-            return Build();
         }
 
         public ITransition Build()

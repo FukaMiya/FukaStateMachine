@@ -93,7 +93,7 @@ namespace FukaMiya.Utils
             }
         }
         private Func<T> contextProvider;
-        public void SetContextProvider(Func<T> contextProvider) => this.contextProvider = contextProvider;
+        internal void SetContextProvider(Func<T> contextProvider) => this.contextProvider = contextProvider;
         public void ClearContextProvider() => this.contextProvider = null;
     }
 
