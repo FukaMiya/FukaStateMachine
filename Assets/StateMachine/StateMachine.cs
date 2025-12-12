@@ -50,13 +50,15 @@ namespace FukaMiya.Utils
 
     public static class StateMachine
     {
-        public static IPullStateMachine Create(StateFactory factory)
+        public static IPullStateMachine Create(StateFactory factory = null)
         {
+            factory ??= new StateFactory();
             return new PullStateMachine(factory);
         }
 
-        public static IPushAndPullStateMachine Create<TEvent>(StateFactory factory) where TEvent : Enum
+        public static IPushAndPullStateMachine Create<TEvent>(StateFactory factory = null) where TEvent : Enum
         {
+            factory ??= new StateFactory();
             var sm = new PushAndPullStateMachine(factory);
             sm.SetEnumType(typeof(TEvent));
             return sm;
@@ -67,17 +69,11 @@ namespace FukaMiya.Utils
     {
         private readonly Dictionary<Type, Func<State>> factories;
         private readonly Dictionary<Type, State> stateCache = new();
-        public IReadOnlyList<State> CachedStates => new List<State>(stateCache.Values);
+        public IEnumerable<State> CachedStates => stateCache.Values;
         public bool IsAutoCreateEnabled { get; set; } = true;
 
-        public StateFactory()
-        {
-            factories = new Dictionary<Type, Func<State>>();
-        }
-        public StateFactory(Dictionary<Type, Func<State>> factories)
-        {
-            this.factories = factories;
-        }
+        public StateFactory() => factories = new ();
+        public StateFactory(Dictionary<Type, Func<State>> factories) => this.factories = factories;
 
         public void Register<T>(Func<State> factory) where T : State
         {

@@ -18,7 +18,7 @@ Unity向けの軽量かつ柔軟なステートマシンライブラリです。
 ## 使い方
 リポジトリ内の`Assets/StateMachine`フォルダを、Unityプロジェクトの任意の場所に配置してください。
 使用時には`using FukaMiya.Utils;`を追記してください。
-具体的な使い方はGameEntryPoint.csを確認してください。Demo.unityから実行することができます。
+具体的な使い方は[GameEntryPoint.cs](Assets/GameEntryPoint.cs)を確認してください。Demo.unityから実行することができます。
 
 ## ライセンス
 [MIT License](LICENSE)
