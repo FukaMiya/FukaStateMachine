@@ -1,8 +1,11 @@
 using System;
 using System.Text;
 
-namespace FukaStateMachine
+namespace HybridStateMachine
 {
+    /// <summary>
+    /// Implementation of a pull-based state machine.
+    /// </summary>
     internal class PullStateMachine : IPullStateMachine
     {
         public State CurrentState { get; protected set; }
@@ -26,8 +29,8 @@ namespace FukaStateMachine
                 throw new InvalidOperationException("CurrentState is not set. Please set the initial state using SetInitialState<T>() method.");
             }
 
-            if (AnyState.CheckTransitionTo(-1, out var nextState) ||
-                CurrentState.CheckTransitionTo(-1, out nextState))
+            if (AnyState.CheckTransition(-1, out var nextState) ||
+                CurrentState.CheckTransition(-1, out nextState))
             {
                 ChangeState(nextState);
                 return;
@@ -39,6 +42,12 @@ namespace FukaStateMachine
         public void SetInitialState<T>() where T : State
         {
             CurrentState = At<T>();
+            CurrentState.Enter();
+        }
+
+        public void SetInitialState(State state)
+        {
+            CurrentState = state;
             CurrentState.Enter();
         }
 
@@ -60,7 +69,7 @@ namespace FukaStateMachine
             sb.AppendLine("stateDiagram-v2");
             foreach (var state in stateFactory.CachedStates)
             {
-                foreach (var t in state.GetTransitions)
+                foreach (var t in state.GetTransitions())
                 {
                     var toState = t.GetToState();
                     var transitionName = string.IsNullOrEmpty(t.Name) ? (toState == null ? "AnyState" : toState.ToString()) : t.Name;

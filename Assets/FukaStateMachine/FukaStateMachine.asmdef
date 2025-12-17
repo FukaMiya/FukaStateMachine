@@ -1,5 +1,5 @@
 {
-    "name": "FukaStateMachine",
+    "name": "HybridStateMachine",
     "rootNamespace": "",
     "references": [],
     "includePlatforms": [],

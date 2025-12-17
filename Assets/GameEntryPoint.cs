@@ -1,5 +1,5 @@
 using UnityEngine;
-using FukaStateMachine;
+using HybridStateMachine;
 
 // 1. イベントIDの定義
 public enum GameEvent
@@ -92,12 +92,12 @@ public class GameEntryPoint : MonoBehaviour
             .When(() => Input.GetKeyDown(KeyCode.Return))
             .Build();
 
-        // --- 初期化 ---
-        stateMachine.SetInitialState<TitleState>();
-
         // --- 可視化 ---
         // 定義した遷移図をMermaid記法で出力
         Debug.Log(stateMachine.ToMermaidString());
+
+        // --- 初期化 ---
+        stateMachine.SetInitialState<TitleState>();
     }
 
     void Update()
@@ -141,7 +141,7 @@ public class TitleState : State
     protected override void OnEnter()
     {
         game.Score = 0; // タイトルに戻ったらスコアリセットの例
-        Debug.Log("Enter: Title");
+        Debug.Log("Enter: Title (Press 'Enter' to Start)");
     }
 
     protected override void OnUpdate() {}

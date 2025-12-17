@@ -1,8 +1,17 @@
 using System;
 
-namespace FukaStateMachine
+namespace HybridStateMachine
 {
+    /// <summary>
+    /// Delegate for state transition conditions.
+    /// </summary>
+    /// <returns></returns>
     public delegate bool StateCondition();
+
+    /// <summary>
+    /// Parameters for a transition.
+    /// Set via ITransitionParameterSetter.
+    /// </summary>
     internal sealed class TransitionParams
     {
         public string Name { get; set; } = string.Empty;
@@ -10,6 +19,9 @@ namespace FukaStateMachine
         public bool IsReentryAllowed { get; set; } = false;
     }
 
+    /// <summary>
+    /// Interface for a transition between states.
+    /// </summary>
     public interface ITransition
     {
         StateCondition Condition { get; }
@@ -23,6 +35,10 @@ namespace FukaStateMachine
         void OnTransition(State state);
     }
 
+    /// <summary>
+    /// Transition between states.
+    /// </summary>
+    /// <typeparam name="TContext"></typeparam>
     internal sealed class Transition<TContext> : ITransition
     {
         private readonly State to;

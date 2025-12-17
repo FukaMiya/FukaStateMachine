@@ -1,7 +1,10 @@
 using System;
 
-namespace FukaStateMachine
+namespace HybridStateMachine
 {
+    /// <summary>
+    /// Implementation of a state machine that supports both push and pull mechanisms.
+    /// </summary>
     internal sealed class PushAndPullStateMachine : PullStateMachine, IPushAndPullStateMachine, IEnumTypeHolder
     {
         public PushAndPullStateMachine(StateFactory factory) : base(factory)
@@ -12,8 +15,8 @@ namespace FukaStateMachine
 
         public void Fire(int eventId)
         {
-            if (AnyState.CheckTransitionTo(eventId, out var nextState) ||
-                CurrentState.CheckTransitionTo(eventId, out nextState))
+            if (AnyState.CheckTransition(eventId, out var nextState) ||
+                CurrentState.CheckTransition(eventId, out nextState))
             {
                 ChangeState(nextState);
                 return;

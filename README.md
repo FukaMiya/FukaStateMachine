@@ -1,5 +1,5 @@
 ## 概要
-FukaStateMachineはUnity向けの軽量かつ柔軟なステートマシンライブラリです。
+HybridStateMachineはUnity向けの軽量かつ柔軟なステートマシンライブラリです。
 「ポーリング（Pull型）」と「イベント駆動（Push型）」をシームレスに統合し、メソッドチェーンによる直感的な記述と、DI（依存性注入）への柔軟な対応を特徴としています。
 
 ## 特徴
@@ -17,7 +17,7 @@ FukaStateMachineはUnity向けの軽量かつ柔軟なステートマシンラ�
 
 ## 使い方
 リポジトリ内の`Assets/StateMachine`フォルダを、Unityプロジェクトの任意の場所に配置してください。
-使用時には`using FukaStateMachine;`を追記してください。
+使用時には`using HybridStateMachine;`を追記してください。
 具体的な使い方は[GameEntryPoint.cs](Assets/GameEntryPoint.cs)を確認してください。Demo.unityから実行することができます。
 
 ## ライセンス
